@@ -17,15 +17,23 @@ namespace PowerApps.Samples
 
         public static string GetParameterValueFromConnectionString(string connectionString, string parameter)
         {
-            try
-            {
-                return connectionString.Split(';').Where(s => s.Trim().StartsWith(parameter)).FirstOrDefault().Split('=')[1];
-            }
-            catch (Exception)
+            if (string.IsNullOrWhiteSpace(connectionString) || string.IsNullOrWhiteSpace(parameter))
             {
                 return string.Empty;
             }
 
+            var match = connectionString
+                .Split(';')
+                .Select(s => s.Trim())
+                .FirstOrDefault(s => s.StartsWith(parameter + "=", StringComparison.OrdinalIgnoreCase));
+
+            if (string.IsNullOrEmpty(match))
+            {
+                return string.Empty;
+            }
+
+            var parts = match.Split(new[] { '=' }, 2);
+            return parts.Length == 2 ? parts[1] : string.Empty;
         }
 
         public static HttpClient GetHttpClient(string connectionString, string clientId, string redirectUrl, string version)
